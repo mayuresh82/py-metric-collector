@@ -3,8 +3,10 @@ import yaml
 import sys
 import logging
 import pprint
+import json
 from os import path
 from metric_collector import parser_manager
+from lxml import etree
 
 here = path.abspath(path.dirname(__file__))
 
@@ -85,6 +87,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
 
     ## Read XML content
     xml_data = open( test_dir + "/rpc-reply/show_route_summary/command.xml").read()
+    xml_etree = etree.fromstring(xml_data)
 
     expected_dict_0 = {
         'fields': {   'active-route-count': '16',
@@ -105,7 +108,34 @@ class Test_Validate_Main_Block(unittest.TestCase):
         'tags': {   'key': 'inet6.0'}
     }
 
-    data = pm.parse( input="show-route-summary.parser.yaml", data=xml_data.encode() )
+    data = list(pm.parse( input="show-route-summary.parser.yaml", data=xml_etree))
+
+    self.assertDictEqual( expected_dict_0, data[0] )
+    self.assertDictEqual( expected_dict_1, data[1] )
+
+    self.assertTrue( len(data) == 2 )
+
+  def test_parse_valid_xml_enum(self):
+    test_dir = here+'/input/21_xml_enum_parser'
+
+    pm = parser_manager.ParserManager( parser_dirs=[test_dir + "/parsers"], default_parser_dir=False )
+
+    ## Read XML content
+    xml_data = open( test_dir + "/rpc-reply/show_bgp_neighbor/command.xml").read()
+    xml_etree = etree.fromstring(xml_data)
+
+    expected_dict_0 = {
+        'fields': {'flap-count': '13', 'status': 0},
+        'measurement': None,
+        'tags': {'peer-id': '10.20.250.251', 'peer-as': '65003', 'peer-state': 'Established'}, 
+    }
+    expected_dict_1 = {
+        'fields': {'flap-count': '4', 'status': 2},
+        'measurement': None,
+        'tags': {'peer-id': '10.20.250.252', 'peer-as': '65001', 'peer-state': 'Idle'}
+    }
+  
+    data = list(pm.parse( input="show-bgp-neighbor.parser.yaml", data=xml_etree))
 
     self.assertDictEqual( expected_dict_0, data[0] )
     self.assertDictEqual( expected_dict_1, data[1] )
@@ -147,7 +177,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
     xml_data = open( test_dir + "/rpc-reply/show_system_processes_extensive/command_short.xml").read()
 
     ## Return a list dict
-    data = pm.parse( input="show-system-processes-extensive.parser.yaml", data=xml_data.encode() )
+    data = list(pm.parse( input="show-system-processes-extensive.parser.yaml", data=xml_data.encode()))
 
     # pp.pprint(data)
     expected_dict_1 = {
@@ -172,3 +202,63 @@ class Test_Validate_Main_Block(unittest.TestCase):
     self.assertDictEqual( expected_dict_2, data[1] )
     self.assertDictEqual( expected_dict_3, data[2] )
     self.assertTrue( len(data) == 4 )
+
+  def test_parse_valid_json(self):
+    test_dir = here+'/input/51_json_parser'
+
+    pm = parser_manager.ParserManager(parser_dirs=[test_dir + "/parsers"], default_parser_dir=False)
+
+    # Read JSON Content
+    with open(test_dir + "/json-reply/f5-pools.json") as f:
+        data = f.read()
+
+    json_data = json.loads(data)
+
+    data = pm.parse(input="f5-pools.yaml", data=json_data)
+
+    expected_dict_1 = {'fields': {'active_member_count': 1,
+             'bits_in': 0,
+             'bits_out': 0,
+             'current_conns': 0,
+             'current_sessions': 0,
+             'max_conns': 0,
+             'min_active_members': 0,
+             'packets_in': 0,
+             'packets_out': 0,
+             'total_conns': 0,
+             'total_requests': 0},
+  'measurement': None,
+  'tags': {'partition_poolname': '/Common/RA-WEB241-443'}}
+
+    expected_dict_2 = {'fields': {'active_member_count': 1,
+             'bits_in': 0,
+             'bits_out': 0,
+             'current_conns': 0,
+             'current_sessions': 0,
+             'max_conns': 0,
+             'min_active_members': 0,
+             'packets_in': 0,
+             'packets_out': 0,
+             'total_conns': 0,
+             'total_requests': 0},
+  'measurement': None,
+  'tags': {'partition_poolname': '/Common/matte_xff_test_pool'}} 
+
+    expected_dict_3 = {'fields': {'active_member_count': 1,
+             'bits_in': 1085496,
+             'bits_out': 172672,
+             'current_conns': 0,
+             'current_sessions': 0,
+             'max_conns': 2,
+             'min_active_members': 0,
+             'packets_in': 582,
+             'packets_out': 527,
+             'total_conns': 47,
+             'total_requests': 442},
+  'measurement': None,
+  'tags': {'partition_poolname': '/Common/rkeller_syslog_pool'}}
+
+    self.assertDictEqual( expected_dict_1, data[0] )
+    self.assertDictEqual( expected_dict_2, data[1] )
+    self.assertDictEqual( expected_dict_3, data[2] )
+    self.assertTrue( len(data) == 6 )

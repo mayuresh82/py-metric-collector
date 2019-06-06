@@ -8,6 +8,8 @@ import os
 import sys
 import yaml
 import argparse
+import logging
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 try:
     import requests
@@ -57,6 +59,7 @@ def open_yaml_file(yaml_file):
             except yaml.YAMLError as yaml_error:
                 sys.exit(yaml_error)
     except IOError as io_error:
+        logging.error(io_error)
         sys.exit("Cannot open YAML file.\n%s" % io_error)
     return yaml_file_content
 
@@ -70,9 +73,8 @@ class NetboxAsInventory(object):
         script_config_data: Content of its config which comes from YAML file.
     """
 
-    def __init__(self, script_args, script_config_data):
+    def __init__(self, script_config_data):
         # Script arguments.
-        self.config_file = script_args.config_file
 
         self.inventory_dict = dict()
 
@@ -86,11 +88,13 @@ class NetboxAsInventory(object):
         self.filters = self._config(["filters"], default={})
         self.context = self._config(["context"], default={})
 
+        self.device_type = self._config(["device_type"], default='device_type/manufacturer/slug')
+
         # Get value based on key.
         self.key_map = {
             "default": "name",
             "general": "name",
-            "custom": "value",
+            "custom": None,
             "status": "label",
             "device_type": "model",
             "ip": "address"
@@ -117,14 +121,16 @@ class NetboxAsInventory(object):
             # Reduce key path, where it get value from nested dict.
             # a replacement for buildin reduce function.
             for key in key_path:
+                
                 if isinstance(source_dict.get(key), dict) and len(key_path) > 1:
                     source_dict = source_dict.get(key)
                     key_path = key_path[1:]
+
                     self._get_value_by_path(source_dict, key_path,
                                             ignore_key_error=ignore_key_error, default=default)
                 else:
                     key_value = source_dict[key]
-
+                
         # How to set the key value, if the key was not found.
         except KeyError as key_name:
             if default:
@@ -133,7 +139,7 @@ class NetboxAsInventory(object):
                 key_value = None
             elif not key_value and not ignore_key_error:
                 sys.exit("The key %s is not found. Please remember, Python is case sensitive." % key_name)
-        return key_value
+        return key_value 
 
     def _config(self, key_path, default=""):
         """Get value from config var.
@@ -165,6 +171,7 @@ class NetboxAsInventory(object):
         if not self.api_url:
             sys.exit("Please check API URL in script configuration file.")
 
+        logging.info('Getting hosts list from netbox')
         api_url_params = ""
 
         # Add filters provided into the URL
@@ -205,6 +212,7 @@ class NetboxAsInventory(object):
                 global_hosts_list_json['results'] += grp_hosts_list_json['results']
                 global_hosts_list_json['count'] += grp_hosts_list_json['count']
 
+            logging.info('Got {} global hosts from netbox'.format(global_hosts_list_json['count']))
             return global_hosts_list_json
 
 
@@ -223,6 +231,7 @@ class NetboxAsInventory(object):
         ### Check if the primary IP address is defined
         ### Skip device if not defined
         if not isinstance(host_data['primary_ip'], dict):
+            logging.error('Primary IP not defined for {}, skipping host'.format(device_name))
             return False
 
         ip_address = host_data['primary_ip']['address'].split('/')[0]
@@ -232,6 +241,10 @@ class NetboxAsInventory(object):
             'address': ip_address,
             'context': []
         }
+
+        if self.device_type:
+            device_type = self._get_value_by_path(host_data, self.device_type.split('/'))
+            self.inventory_dict[device_name]['device_type'] = device_type
 
         if self.tags:
             # There are 2 categories that will be used to group hosts.
@@ -249,11 +262,17 @@ class NetboxAsInventory(object):
 
                 # The groups that will be used to group hosts in the inventory.
                 for tag in self.tags[category]:
+
+                    key_path = [ tag ]
+                    if key_name != None:
+                        key_path.append(key_name)
+
                     # Try to get group value. If the section not found in netbox, this also will print error message.
-                    tag_value = self._get_value_by_path(data_dict, [tag, key_name])
+                    tag_value = self._get_value_by_path(data_dict, key_path, ignore_key_error=True)
 
                     ## Add value
-                    self.inventory_dict[device_name]['tags'].append(tag_value)
+                    if tag_value != None:
+                        self.inventory_dict[device_name]['tags'].append(tag_value)
         
         return True
 
@@ -344,7 +363,8 @@ class NetboxAsInventory(object):
         print(json.dumps(inventory_dict, sort_keys=True,indent=4,))
 
     def netbox_get_devices_list(self, params=''):
-        
+       
+        logging.info('Quering netbox for devices list with params: {}'.format(params))
         results = {
             'count': 0,
             'results': []
@@ -365,7 +385,8 @@ class NetboxAsInventory(object):
               
             hosts_list = self.req.get(self.api_url, 
                                     params=api_url_params, 
-                                    verify=self.verify_certs )
+                                    verify=self.verify_certs,
+                                    timeout=10.0)
 
             hosts_list.raise_for_status()
 
@@ -378,6 +399,9 @@ class NetboxAsInventory(object):
             if int(hosts_list_dict['count']) < offset:
                 keep_querying = False
 
+        if results['count'] == 0 or len(results['results']) == 0:
+            logging.error("Got 0 results from netbox !")
+            sys.exit("No results returned from netbox")
         return results
 
 
@@ -388,7 +412,7 @@ def main():
     config_data = open_yaml_file(args.config_file)
 
     # Netbox vars.
-    netbox = NetboxAsInventory(args, config_data)
+    netbox = NetboxAsInventory(config_data)
     ansible_inventory = netbox.generate_inventory()
     netbox.print_inventory_json(ansible_inventory)
 

@@ -22,6 +22,8 @@ parser:
             -   { xpath: ./traffic-statistics/output-bytes,         variable-name: output-bytes }
             -   { xpath: ./traffic-statistics/input-packets,        variable-name: input-packets }
             -   { xpath: ./traffic-statistics/output-packets,       variable-name: output-packets }
+            -   { xpath: ./traffic-statistics/input-bps,        variable-name: input-bps }
+            -   { xpath: ./traffic-statistics/output-bps,        variable-name: output-bps } 
             -   { xpath: ./traffic-statistics/ipv6-transit-statistics/input-bytes,          variable-name: ipv6-input-bytes }
             -   { xpath: ./traffic-statistics/ipv6-transit-statistics/output-bytes,         variable-name: ipv6-output-bytes }
             -   { xpath: ./traffic-statistics/ipv6-transit-statistics/input-packets,        variable-name: ipv6-input-packets }
@@ -33,7 +35,16 @@ parser:
             -   { xpath: ./ethernet-mac-statistics/output-broadcasts,   variable-name: output-broadcasts }
             -   { xpath: ./ethernet-mac-statistics/input-multicasts,    variable-name: input-multicasts }
             -   { xpath: ./ethernet-mac-statistics/output-multicasts,   variable-name: output-multicasts }
-
+            -   xpath: ./oper-status
+                variable-name: oper-status
+                enumerate:
+                  up: 0
+                  down: 1
+            -   xpath: ./admin-status
+                variable-name: admin-status
+                enumerate:
+                  up: 0
+                  down: 1
 ### ----------------------------------------------------------------
 ### Statistic per Queue
 ### ----------------------------------------------------------------
@@ -42,8 +53,7 @@ parser:
         measurement: jnpr_interface_queue_stat
         xpath: //interface-information/physical-interface/queue-counters/queue
         loop:
-            name: ./../../name
-            interface: ./name
+            interface: ./../../name
             admin-status: ./../../admin-status
             queue-number: ./queue-number
             forwardding-class: ./forwarding-class-name
@@ -60,7 +70,6 @@ parser:
         measurement: jnpr_interface_error
         xpath: //interface-information/physical-interface[logical-interface]
         loop:
-            name: ./name
             interface: ./name
             description: ./description
             parent: ./logical-interface/address-family/ae-bundle-name

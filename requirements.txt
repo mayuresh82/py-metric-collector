@@ -2,11 +2,14 @@ cffi
 # enum
 ncclient
 jxmlease
-pytest
+pytest>=3.6
 pytest-cov
 jinja2
-PyYAML
+pyyaml>=4.2b1
 requests
 junos-eznc
 ipaddress
 textfsm
+f5-sdk
+jmespath
+requests_mock

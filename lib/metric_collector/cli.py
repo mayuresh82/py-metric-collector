@@ -2,9 +2,7 @@
 from datetime import datetime 
 from datetime import timedelta
 
-from lxml import etree  # Used for xml manipulation
 from pprint import pformat
-from pprint import pprint
 import argparse 
 import subprocess
 from subprocess import run
@@ -24,20 +22,19 @@ import time
 import yaml
 import copy
 
-from metric_collector import parser_manager
-from metric_collector import netconf_collector
-from metric_collector import host_manager
+from metric_collector import (
+    parser_manager, host_manager, collector, scheduler, utils
+)
 
 logging.getLogger("paramiko").setLevel(logging.INFO)
 logging.getLogger("ncclient").setLevel(logging.WARNING) # In order to remove http request from ssh/paramiko
 logging.getLogger("requests").setLevel(logging.INFO)
 logging.getLogger("urllib3").setLevel(logging.WARNING)  # In order to remove http request from InfluxDBClient
 
-logger = logging.getLogger("main")
+logger = logging.getLogger('main')
 
-### ------------------------------------------------------------------------------
-### Defining the classes and procedures used later on the script
-### ------------------------------------------------------------------------------
+global_measurement_prefix = 'metric_collector'
+
 
 def shard_host_list(shard_id, shard_size, hosts): 
     """
@@ -45,7 +42,7 @@ def shard_host_list(shard_id, shard_size, hosts):
 
     shard_id starts at 1
     """
-
+    logger.info('Using shard_id: {} , shard_size: {} on {} hosts'.format(shard_id, shard_size, len(hosts)))
     if shard_id == 0:
         return False
     elif shard_id > shard_size:
@@ -59,156 +56,111 @@ def shard_host_list(shard_id, shard_size, hosts):
         if i % shard_size != shard_id:
             del hosts[hosts_list[i]]
 
+    logger.info('Got {} hosts in this shard'.format(len(hosts)))
     return hosts
 
 
-def print_format_influxdb(datapoints):
+def select_hosts(hosts_file, tag_list, sharding, sharding_offset, scheduler=None, refresh_interval=None, refresh=False):
     """
-    Print all datapoints to STDOUT in influxdb format for Telegraf to pick them up
+    Parse a host file or pull hosts from dynamic inventory , and add it to the scheduler periodically
     """
+    hosts = import_inventory(hosts_file = hosts_file)
 
-    for data in format_datapoints_inlineprotocol(datapoints):
-        print(data)
+    if sharding:
+        sharding_param = sharding.split('/')
 
-    logger.debug('Printing Datapoint to STDOUT:')
+        if len(sharding_param) != 2:
+            logger.error('Sharding Parameters not valid %s' % sharding)
+            sys.exit(0)
 
-def post_format_influxdb(datapoints, addr="http://localhost:8186/write"):
-    
-    s = requests.session()
-    for datapoint in format_datapoints_inlineprotocol(datapoints):
-        s.post(addr, data=datapoint)
+        shard_id = int(sharding_param[0])
+        shard_size = int(sharding_param[1])
 
-    logger.info('Sending Datapoint to: %s' % addr)
+        if sharding_offset:
+            shard_id += 1
 
+        hosts = shard_host_list(shard_id, shard_size, hosts)
 
-def format_datapoints_inlineprotocol(datapoints):
+    if scheduler:
+        scheduler.add_hosts(hosts, host_tags=tag_list, refresh=refresh)
+        t = threading.Timer(
+            refresh_interval, select_hosts,
+            args=(hosts_file, tag_list, sharding, sharding_offset),
+            kwargs={'scheduler': scheduler, 'refresh_interval': refresh_interval, 'refresh': True},
+        )
+        t.setDaemon(True)
+        t.start()
+    else:
+        return hosts
+
+def import_inventory(hosts_file, retry=3, retry_internal=5): 
     """
-    Format all datapoints with the inlineprotocol (influxdb)
-    Return a list of string formatted datapoint
+    Import the inventory either from a yaml file or from a dynamic inventory script
+
+    Return a dict of hosts
     """
-    
-    formatted_data = []
+    hosts = {}
 
-    ## Format Tags
-    if datapoints is not None:
-      for datapoint in datapoints:
-          tags = ''
-          first_tag = 1
-          for tag, value in datapoint['tags'].items():
+    BASE_DIR = os.getcwd()
 
-              if first_tag == 1:
-                  first_tag = 0
-              else:
-                  tags = tags + ','
+    ### check if the file is present
+    if not os.path.isfile(hosts_file):
+        hosts_file_full = BASE_DIR + "/"+ hosts_file
 
-              tags = tags + '{0}={1}'.format(tag,value)
-
-          ## Format Measurement
-          fields = ''
-          first_field = 1
-          for tag, value in datapoint['fields'].items():
-
-              if first_field == 1:
-                  first_field = 0
-              else:
-                  fields = fields + ','
-
-              fields = fields + '{0}={1}'.format(tag,value)
-
-          if datapoint['tags']:
-            formatted_data.append("{0},{1} {2}".format(datapoint['measurement'], tags, fields))
-          else:
-            formatted_data.append("{0} {1}".format(datapoint['measurement'], fields))
-
-    return formatted_data
-
-
-def collector(host_list, hosts_manager, parsers_manager, 
-                output_type='stdout', 
-                command_tags=['.*'], 
-                output_addr='http://localhost:8186/write'): 
-
-    for host in host_list: 
-        target_commands = hosts_manager.get_target_commands(host, tags=command_tags)
-        credential = hosts_manager.get_credentials(host)
-
-        host_reacheable = False
-
-        logger.info('Collector starting for: %s', host)
-        host_address = hosts_manager.get_address(host)
-        
-        jdev = netconf_collector.NetconfCollector(host=host, address=host_address, credential=credential, parsers=parsers_manager)
-        jdev.connect()
-
-        if jdev.is_connected():
-            jdev.collect_facts()
-            host_reacheable = True
-
+        if not os.path.isfile(hosts_file_full):
+            logger.warn('Unable to find the inventory file (neither %s or %s)' % (hosts_file, hosts_file_full))
         else:
-            logger.error('Unable to connect to %s, skipping', host)
-            host_reacheable = False
+            hosts_file = hosts_file_full
 
-        values = []
-        time_execution = 0
-        cmd_successful = 0
-        cmd_error = 0
+    logger.info('Importing host file: %s', hosts_file)
 
-        if host_reacheable == True:
-            time_start = time.time()
-            
-            ### Execute commands on the device
-            for command in target_commands:
-                try:
-                    logger.info('[%s] Collecting > %s' % (host,command))
-                    values += jdev.collect(command=command)
-                    cmd_successful += 1
+    ### Ensure that Retry has a valid value
+    ### Must be an integer equal or higher than 1 
+    if not isinstance(retry, int):
+        retry = 3
+    elif retry < 1:
+        retry = 3
 
-                except Exception as err:
-                    cmd_error += 1
-                    logger.error('An issue happened while collecting %s on %s > %s ' % (host,command, err))
-                    logger.error(traceback.format_exc())
+    for i in range(1, retry+1):
+        is_yaml = False
+        is_exec = False
 
-            ### Save collector statistics 
-            time_end = time.time()
-            time_execution = time_end - time_start
+        try:
+            with open(hosts_file) as f:
+                hosts = yaml.full_load(f)
+            is_yaml = True
+        except Exception as e:
+            logger.debug('Error importing host file in yaml: %s > %s [%s/%s]' % (hosts_file, e, i, retry ))
 
-        exec_time_datapoint = [{
-            'measurement': 'jnpr_netconf_collector_stats',
-            'tags': {
-                'device': jdev.hostname
-            },
-            'fields': {
-                'execution_time_sec': "%.4f" % time_execution,
-                'nbr_commands':  cmd_successful + cmd_error,
-                'nbr_successful_commands':  cmd_successful,
-                'nbr_error_commands':  cmd_error,
-                'reacheable': int(host_reacheable),
-                'unreacheable': int(not host_reacheable)
-            }
-        }]
+        if not is_yaml:
+            try:
+                output_str = run(["python", hosts_file], capture_output=True, check=True)
+                hosts = json.loads(output_str.stdout)
+                logger.debug('Script logs: \n{}\n'.format(output_str.stderr.decode()))
+                is_exec = True
+            except subprocess.CalledProcessError as ex:
+                logger.debug('Inventory script failed with exit code {}. Cmd: {} Output: {} Logs: {}'.format(
+                    ex.returncode, ex.cmd, ex.output, ex.stderr))
+            except Exception as e:
+                logger.debug('Error importing executing host file: %s > %s [%s/%s]' % (hosts_file, e, i, retry))
 
-        values += exec_time_datapoint
+        if not is_exec and not is_yaml:
+            logger.warn('Unable to import the hosts file (%s) from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))
+  
+        ### ensure hosts is still a dict
+        if not isinstance(hosts, dict):
+            hosts = {}
 
-        ### if context information are provided add these in the tag list
-        ### the context is a list of dict, go over all element and 
-        ### check if a similar tag already exist 
-        host_context = hosts_manager.get_context(host)
-        for value in values:
-            for item in host_context:
-                for k, v in item.items():
-                    if k in value['tags']: 
-                        continue
-                    value['tags'][k] = v
-
-        ### Send results to the right output
-        if output_type == 'stdout':
-            print_format_influxdb(values)
-        elif output_type == 'http':
-            post_format_influxdb(values, output_addr)
+        if len(hosts.keys()) > 0:
+            return hosts
+        elif len(hosts.keys()) == 0 and i == retry:
+            logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory after all try, ABORDING [%s/%s]' % (hosts_file, i, retry))
+            return {}
         else:
-            logger.warn('Output format unknown: %s', output_type)
-      
-      
+            logger.warn('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory [%s/%s]' % (hosts_file, i, retry))
+            time.sleep(retry_internal)
+
+
 ### ------------------------------------------------------------------------------
 ### Create and Parse Arguments
 ### -----------------------------------------------------------------------------    
@@ -232,14 +184,13 @@ def main():
     full_parser.add_argument("--tag", nargs='+', help="Collect data from hosts that matches the tag")
     full_parser.add_argument("--cmd-tag", nargs='+', help="Collect data from command that matches the tag")
     
-    full_parser.add_argument("-c", "--console", action='store_true', help="Console logs enabled")
     full_parser.add_argument( "--test", action='store_true', help="Use emulated Junos device")
     full_parser.add_argument("-s", "--start", action='store_true', help="Start collecting (default 'no')")
     full_parser.add_argument("-i", "--input", default=BASE_DIR, help="Directory where to find input files")
 
     full_parser.add_argument("--loglvl", default=20, help="Logs verbosity, 10-debug, 50 Critical")
 
-    full_parser.add_argument("--logdir", default="logs", help="Directory where to store logs")
+    full_parser.add_argument("--logdir", default="", help="Directory where to store logs")
     
     full_parser.add_argument("--sharding",  help="Define if the script is part of a shard need to include the place in the shard and the size of the shard [0/3]")
     full_parser.add_argument("--sharding-offset", default=True, help="Define an offset needs to be applied to the shard_id")
@@ -256,12 +207,17 @@ def main():
     full_parser.add_argument("--commands", default="commands.yaml", help="Commands file in Yaml")
     full_parser.add_argument("--credentials", default="credentials.yaml", help="Credentials file in Yaml")
 
+    full_parser.add_argument("--no-facts", action='store_false', help="Disable facts collection on device (remove version and product name in results)")
+    
     full_parser.add_argument("--output-format", default="influxdb", help="Format of the output")
     full_parser.add_argument("--output-type", default="stdout", choices=['stdout', 'http'], help="Type of output")
     full_parser.add_argument("--output-addr", default="http://localhost:8186/write", help="Addr information for output action")
 
-    full_parser.add_argument("--use-thread", default=True, help="Spawn multiple threads to collect the information on the devices")
-    full_parser.add_argument("--nbr-thread", default=10, help="Maximum number of thread to spawn (default 10)")
+    full_parser.add_argument("--no-collector-threads", action='store_true', help="Dont Spawn multiple threads to collect the information on the devices")
+    full_parser.add_argument("--nbr-collector-threads", type=int, default=10, help="Maximum number of collector thread to spawn (default 10)")
+    full_parser.add_argument("--max-worker-threads", type=int, default=1, help="Maximum number of worker threads per interval for scheduler")
+    full_parser.add_argument("--use-scheduler", action='store_true', help="Use scheduler")
+    full_parser.add_argument("--hosts-refresh-interval", type=int, default=3*60*60, help="Interval to periodically refresh dynamic host inventory")
 
     dynamic_args = vars(full_parser.parse_args())
 
@@ -280,7 +236,7 @@ def main():
     db_schema = dynamic_args['dbschema']
     max_connection_retries = dynamic_args['retry']
     delay_between_commands = dynamic_args['delay']
-    logging_level = dynamic_args['loglvl']
+    logging_level = int(dynamic_args['loglvl'])
     default_junos_rpc_timeout = dynamic_args['timeout']
     use_hostname = dynamic_args['usehostname']
 
@@ -303,25 +259,21 @@ def main():
     ### ------------------------------------------------------------------------------
     ### Logging
     ### ------------------------------------------------------------------------------
-    timestamp = time.strftime("%Y-%m-%d", time.localtime(time.time()))
-    log_dir = BASE_DIR + "/" + dynamic_args['logdir']
-    logger = logging.getLogger("main")
+    formatter = logging.Formatter('%(asctime)s %(name)s: %(levelname)s:  %(message)s')
+    sh = logging.StreamHandler()
+    sh.setFormatter(formatter)
+    handlers = [sh]
+    if dynamic_args['logdir']:
+        log_dir = BASE_DIR + "/" + dynamic_args['logdir']
+        ## Check that logs directory exist, create it if needed
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        filename = log_dir + "/" + 'metric_collector.log',
+        fh = logging.handlers.RotatingFileHandler(filename, maxSize=10*1024*1024, backupCount=5)
+        fh.setFormatter(formatter)
+        handlers.append(fh)
 
-    ## Check that logs directory exist, create it if needed
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
-    formatter = '%(asctime)s %(name)s %(levelname)s %(threadName)-10s:  %(message)s'
-    logging.basicConfig(filename=log_dir + "/"+ timestamp + '_py_netconf.log',
-                        level=logging_level,
-                        format=formatter,
-                        datefmt='%Y-%m-%d %H:%M:%S')
-
-    if dynamic_args['console']:
-        logger.info("Console logs enabled")
-        console = logging.StreamHandler()
-        console.setLevel(logging.DEBUG)
-        logging.getLogger('').addHandler(console)
+    logging.basicConfig(level=logging_level, handlers=handlers)
 
     ### ------------------------------------------------------------------------------
     ### LOAD all credentials in a dict
@@ -337,62 +289,10 @@ def main():
     logger.info('Importing credentials file: %s ',credentials_yaml_file)
     try:
         with open(credentials_yaml_file) as f:
-            credentials = yaml.load(f)
+            credentials = yaml.full_load(f)
     except Exception as e:
         logger.error('Error importing credentials file: %s', credentials_yaml_file)
         sys.exit(0)
-
-    ### ------------------------------------------------------------------------------
-    ###  LOAD all hosts     
-    ###    Host list can come from a yaml file or from a dynamic inventory script
-    ###    Try to load as Yaml First, than try to execute the script an import JSON
-    ### ------------------------------------------------------------------------------
-    
-    hosts = {}
-
-    if os.path.isfile(dynamic_args['hosts']):
-        hosts_file = dynamic_args['hosts']
-    else:
-        hosts_file = BASE_DIR + "/"+ dynamic_args['hosts']
-
-    logger.info('Importing host file: %s ',hosts_file)
-
-    is_yaml = False
-    is_exec = False
-    try:
-        with open(hosts_file) as f:
-            hosts = yaml.load(f)
-        is_yaml = True
-    except Exception as e:
-        logger.debug('Error importing host file in yaml: %s > %s' % (hosts_file, e))
-
-    if not is_yaml:
-        try:
-            output_str = run(["python", hosts_file], stdout=subprocess.PIPE)
-            hosts = json.loads(output_str.stdout)
-            is_exec = True
-        except Exception as e:
-            logger.debug('Error importing executing host file: %s > %s' % (hosts_file, e))
-
-    if not is_yaml and not is_exec:
-        logger.error('Unable to import the hosts file (%s), either in Yaml or from a dynamic inventory',hosts_file)
-        sys.exit(0)
-
-    if 'sharding' in dynamic_args and dynamic_args['sharding'] != None:
-
-        sharding_param = dynamic_args['sharding'].split('/')
-
-        if len(sharding_param) != 2:
-            logger.error('Sharding Parameters not valid %s' % dynamic_args['sharding'])
-            sys.exit(0)
-
-        shard_id = int(sharding_param[0])
-        shard_size = int(sharding_param[1])
-
-        if dynamic_args['sharding_offset']:
-            shard_id += 1
-
-        hosts = shard_host_list(shard_id, shard_size, hosts)
 
     ### ------------------------------------------------------------------------------
     ### LOAD all commands with their tags in a dict           
@@ -408,51 +308,71 @@ def main():
     logger.info('Importing commands file: %s ',commands_yaml_file)
     with open(commands_yaml_file) as f:
         try:
-            for document in yaml.load_all(f):
+            for document in yaml.load_all(f, yaml.FullLoader):
                 commands.append(document)
         except Exception as e:
-            logger.error('Error importing commands file: %s', commands_yaml_file)
+            logger.error('Error importing commands file: %s, %s', commands_yaml_file, str(e))
             sys.exit(0)
 
     general_commands = commands[0]
 
-    ### ------------------------------------------------------------------------------
-    ### LOAD all parsers                                      
-    ### ------------------------------------------------------------------------------
-    parsers_manager = parser_manager.ParserManager( parser_dirs = dynamic_args['parserdir'] )
-    hosts_manager = host_manager.HostManager(
-        inventory=hosts, 
-        credentials=credentials,
-        commands=general_commands
-    )
-
-    logger.debug('Getting hosts that matches the specified tags')
-    #  Get all hosts that matches with the tags
-    target_hosts = hosts_manager.get_target_hosts(tags=tag_list)
-    logger.debug('The following hosts are being selected: %s', target_hosts)
-
-    use_threads = dynamic_args['use_thread']
+    use_threads = not(dynamic_args['no_collector_threads'])
     
     if dynamic_args['cmd_tag']: 
         command_tags = dynamic_args['cmd_tag']
     else:
         command_tags = ['.*']
 
+    sharding = dynamic_args.get('sharding')
+    sharding_offset = dynamic_args.get('sharding_offset')
+    max_worker_threads = dynamic_args.get('max_worker_threads', 1)
+    max_collector_threads = dynamic_args.get('nbr_collector_threads')
+
+    if dynamic_args.get('use_scheduler', False):
+        device_scheduler = scheduler.Scheduler(
+            credentials, general_commands,  dynamic_args['parserdir'],
+            dynamic_args['output_type'], dynamic_args['output_addr'],
+            max_worker_threads=max_worker_threads,
+            use_threads=use_threads, num_threads_per_worker=max_collector_threads
+        )
+        hri = dynamic_args.get('hosts_refresh_interval', 6 * 60 * 60)
+        select_hosts(
+            dynamic_args['hosts'], tag_list, sharding, sharding_offset,
+            scheduler=device_scheduler,
+            refresh_interval=float(hri),
+        )
+        device_scheduler.start()  # blocking call
+        return
+
+    ### ------------------------------------------------------------------------------
+    ### LOAD all parsers
+    ### ------------------------------------------------------------------------------
+    parsers_manager = parser_manager.ParserManager( parser_dirs = dynamic_args['parserdir'] )
+    hosts_conf = select_hosts(dynamic_args['hosts'], tag_list, sharding, sharding_offset)
+    hosts_manager = host_manager.HostManager(
+        credentials=credentials,
+        commands=general_commands
+    )
+    hosts_manager.update_hosts(hosts_conf)
+    coll = collector.Collector(
+            hosts_manager=hosts_manager, 
+            parser_manager=parsers_manager, 
+            output_type=dynamic_args['output_type'], 
+            output_addr=dynamic_args['output_addr'],
+            collect_facts=dynamic_args.get('no_facts', True))
+    target_hosts = hosts_manager.get_target_hosts(tags=tag_list)
+
     if use_threads:
-        max_collector_threads = int(dynamic_args['nbr_thread'])
         target_hosts_lists = [target_hosts[x:x+int(len(target_hosts)/max_collector_threads+1)] for x in range(0, len(target_hosts), int(len(target_hosts)/max_collector_threads+1))]
 
         jobs = []
-        i=1
-        for target_hosts_list in target_hosts_lists:
+
+        for (i, target_hosts_list) in enumerate(target_hosts_lists, 1):
             logger.info('Collector Thread-%s scheduled with following hosts: %s', i, target_hosts_list)
-            thread = threading.Thread(target=collector, 
-                                      kwargs={"host_list":target_hosts_list,
-                                              "parsers_manager":parsers_manager,
-                                              "hosts_manager":hosts_manager,
-                                              "output_type":dynamic_args['output_type'],
-                                              "output_addr":dynamic_args['output_addr'],
-                                              "command_tags": command_tags,
+            thread = threading.Thread(target=coll.collect, 
+                                      args=('global',),
+                                      kwargs={"hosts": target_hosts_list,
+                                              "cmd_tags": command_tags
                                               })
             jobs.append(thread)
             i=i+1
@@ -467,9 +387,7 @@ def main():
     
     else:
         # Execute everythings in the main thread
-        for host in target_hosts:
-            collector([host],parsers_manager=parsers_manager,
-                             hosts_manager=hosts_manager)
+        coll.collect('global', hosts=target_hosts, cmd_tags=command_tags)
     
     ### -----------------------------------------------------
     ### Collect Global Statistics 
@@ -478,27 +396,31 @@ def main():
     time_execution = time_end - time_start
 
     global_datapoint = [{
-            'measurement': 'jnpr_metric_collector_stats_agent',
+            'measurement': global_measurement_prefix + '_stats_agent',
             'tags': {},
             'fields': {
                 'execution_time_sec': "%.4f" % time_execution,
                 'nbr_devices': len(target_hosts)
-            }
+            },
+            'timestamp': time.time_ns(),
         }]
 
     if 'sharding' in dynamic_args and dynamic_args['sharding'] != None:
         global_datapoint[0]['tags']['sharding'] = dynamic_args['sharding']
     
     if use_threads:
-        global_datapoint[0]['fields']['nbr_threads'] = dynamic_args['nbr_thread']
+        global_datapoint[0]['fields']['nbr_threads'] = dynamic_args['nbr_collector_threads']
 
     ### Send results to the right output
-    if dynamic_args['output_type'] == 'stdout':
-        print_format_influxdb(global_datapoint)
-    elif dynamic_args['output_type'] == 'http':
-        post_format_influxdb(global_datapoint, dynamic_args['output_addr'],)
-    else:
-        logger.warn('Output format unknown: %s', dynamic_args['output_type'])
+    try:
+        if dynamic_args['output_type'] == 'stdout':
+            utils.print_format_influxdb(global_datapoint)
+        elif dynamic_args['output_type'] == 'http':
+            utils.post_format_influxdb(global_datapoint, dynamic_args['output_addr'],)
+        else:
+            logger.warn('Output format unknown: %s', dynamic_args['output_type'])
+    except Exception as ex:
+        logger.warn("Hit error trying to post to influx: ", str(ex))
     
 
 if __name__ == "__main__":

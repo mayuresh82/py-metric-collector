@@ -14,19 +14,34 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class NetconfCollector():
 
-  def __init__( self, host=None, address=None, credential={}, test=False, timeout=60, retry=5, use_hostname=True, parsers=None ):
+  def __init__(self, 
+        host=None, 
+        address=None, 
+        credential={}, 
+        test=False, 
+        timeout=15, 
+        retry=3, 
+        use_hostname=True, 
+        parsers=None, 
+        context=None,
+        collect_facts=True):
+
     self.__is_connected = False
     self.__is_test = test
     self.__use_hostname = use_hostname
     self.__timeout = timeout
     self.__retry = retry
+    self.__collect_facts = collect_facts
 
     self.host = address
     self.hostname = host
+    if context:
+        self.context = {k: v for i in context for k, v in i.items()}
+    else:
+        self.context = None
     self.__credential = credential
 
     self.pyez = None
-    self.datapoints = []
     self.facts = {}
 
     self.parsers = parsers
@@ -103,61 +118,79 @@ class NetconfCollector():
     if not self.__is_connected:
       return
 
-    # Collect Facts about the device
-    logger.info('[%s]: Collection Facts on device', self.hostname)
-    self.pyez.facts_refresh()
+    # Collect Facts about the device (if enabled)
+    if self.__collect_facts:
+      logger.info('[%s]: Collection Facts on device', self.hostname)
+      self.pyez.facts_refresh()
 
-    if self.pyez.facts['version']:
-      self.facts['version'] = self.pyez.facts['version']
-    else:
-      self.facts['version'] = 'unknown'
+      if self.pyez.facts['version']:
+        self.facts['version'] = self.pyez.facts['version']
+      else:
+        self.facts['version'] = 'unknown'
 
-    self.facts['product-model'] = self.pyez.facts['model']
+      self.facts['product-model'] = self.pyez.facts['model']
 
-    ## Based on parameter defined in config file
-    if self.__use_hostname and self.pyez.facts['hostname'] != self.hostname:
-      hostname = self.pyez.facts['hostname']
-      logger.info('[%s]: Host will now be referenced as : %s', self.hostname, hostname)
-      self.hostname = hostname
-    else:
-      logger.info('[%s]: Host will be referenced as : %s', self.hostname, self.hostname)
+      ## Based on parameter defined in config file
+      if self.__use_hostname and self.pyez.facts['hostname'] != self.hostname:
+        hostname = self.pyez.facts['hostname']
+        logger.info('[%s]: Host will now be referenced as : %s', self.hostname, hostname)
+        self.hostname = hostname
+      else:
+        logger.info('[%s]: Host will be referenced as : %s', self.hostname, self.hostname)
+
 
     self.facts['device']=self.hostname
+
     return True
 
   def execute_command(self,command=None):
 
     try:
       logger.debug('[%s]: execute : %s', self.hostname, command)
-      # Remember... all rpc must have format=xml at execution time,
+      # the data returned is already in etree format
       command_result = self.pyez.rpc.cli(command, format="xml")
     except RpcError as err:
       rpc_error = err.__repr__()
       logger.error("Error found on <%s> executing command: %s, error: %s:", self.hostname, command ,rpc_error)
-      return False
+      return None
 
-    return etree.tostring(command_result)
+    return command_result
 
   def collect( self, command=None ):
 
-    raw_data = self.execute_command(command=command)
-    datapoints = self.parsers.parse(input=command, data=raw_data)
+    # find the command to execute from the parser directly
+    parser = self.parsers.get_parser_for(command)
+    data = self.execute_command(parser['data']['parser']['command'])
+    
+    if data is None:
+        return None
+    if parser['data']['parser']['type'] == 'textfsm':
+        data = etree.tostring(data)
+    datapoints = self.parsers.parse(input=command, data=data)
     
     if datapoints is not None:
 
       measurement = self.parsers.get_measurement_name(input=command)
 
-      to_return = []
+      timestamp = time.time_ns()
       for datapoint in datapoints:
+        if not datapoint['fields']:
+            continue
         if datapoint['measurement'] == None:
           datapoint['measurement'] = measurement
         datapoint['tags'].update(self.facts)
-        to_return.append(datapoint)
+        if self.context:
+          datapoint['tags'].update(self.context)
+        datapoint['timestamp'] = timestamp
+        yield datapoint
 
-      return to_return
     else:
       logger.warn('No parser found for command > %s',command)
       return None
 
   def is_connected(self):
     return self.__is_connected
+
+  def close(self):
+    if self.__is_connected:
+      self.pyez.close()
