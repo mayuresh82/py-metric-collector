@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright: (c) 2017, Damien Garros
 # Inspired from Ahmed AbouZaid work <http://aabouzaid.com/>
