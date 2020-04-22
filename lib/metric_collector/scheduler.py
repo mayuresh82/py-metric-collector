@@ -10,12 +10,14 @@ logger = logging.getLogger('scheduler')
 class Scheduler:
 
     def __init__(self, creds_conf, cmds_conf, parsers_dir, output_type, output_addr,
-                 max_worker_threads=1, use_threads=True, num_threads_per_worker=10):
+                 max_worker_threads=1, use_threads=True, num_threads_per_worker=10,
+                 collector_timeout=30):
         self.workers = {}
         self.working = set()
         self.host_mgr = host_manager.HostManager(credentials=creds_conf, commands=cmds_conf)
-        self.parser_mgr = parser_manager.ParserManager(parser_dir=parsers_dir)
-        self.collector = collector.Collector(self.host_mgr, self.parser_mgr, output_type, output_addr)
+        self.parser_mgr = parser_manager.ParserManager(parser_dirs=parsers_dir)
+        self.collector = collector.Collector(self.host_mgr, self.parser_mgr, output_type, output_addr,
+            timeout=collector_timeout)
         self.max_worker_threads = max_worker_threads
         self.output_type = output_type
         self.output_addr = output_addr

@@ -63,7 +63,7 @@ class JsonCollector(object):
             try:
                 if self.device_type == 'f5':
                     q = self.base_url + query
-                    result = self.session.get(q, timeout=10.0)
+                    result = self.session.get(q, timeout=self.__timeout)
                     result.raise_for_status()
                     return result.json()
                 elif self.device_type == 'arista':
@@ -81,7 +81,7 @@ class JsonCollector(object):
                         },
                         'id': 'MetricCollector-1'
                     }
-                    result = self.session.post(q, timeout=10.0, json=body)
+                    result = self.session.post(q, timeout=self.__timeout, json=body)
                     result.raise_for_status()
                     resp = result.json()
                     return resp['result'][0]

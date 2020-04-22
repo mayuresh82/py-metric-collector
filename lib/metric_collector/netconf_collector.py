@@ -156,7 +156,7 @@ class NetconfCollector():
 
     return command_result
 
-  def collect( self, command=None ):
+  def collect(self, command=None):
 
     # find the command to execute from the parser directly
     parser = self.parsers.get_parser_for(command)
