@@ -1,5 +1,4 @@
 FROM python:3.7
-LABEL maintainer="dgarros@gmail.com"
 
 RUN mkdir /source
 WORKDIR /source
