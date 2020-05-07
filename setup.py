@@ -1,47 +1,43 @@
 #!/usr/bin/env python3
 
-import sys
-import uuid
+from setuptools import setup
 
-from setuptools import setup, find_packages
-try: # for pip >= 10
-    from pip._internal.req import parse_requirements
-except ImportError: # for pip <= 9.0.3
-    from pip.req import parse_requirements
-    
-__author__ = 'Damien Garros <dgarros@gmail.com>'
+version = '0.1.26'
 
-requirements_data = parse_requirements('requirements.txt', session=uuid.uuid1())
-requirements = [str(package.req) for package in requirements_data]
-
-version = '0.1.1'
-long_description = "Python Collector for Metrics Data, currently support Junos and F5"
-
-params = {
-    'name': 'py-metric-collector',
-    'version': version,
-    'package_dir': {'': 'lib'},
-    'packages': ["metric_collector"],
-    'scripts': [
+setup(
+    name= 'py-metric-collector',
+    version= version,
+    package_dir= {'': 'lib'},
+    packages= ["metric_collector"],
+    scripts= [
         'bin/metric-collector'
     ],
-    'url': 'https://github.com/xxx',
-    'license': 'Apache License, Version 2.0',
-    'author': 'Damien Garros',
-    'author_email': 'dgarros@gmail.com',
-    'description': 'Collect timeserie information from various devices, currently support Junos and F5',
-    'install_requires': requirements,
-    'classifiers': [
-        'Topic :: Utilities',
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Information Technology',
-        'Intended Audience :: System Administrators',
-        'License :: OSI Approved :: Apache Software License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
+    license= 'Apache License, Version 2.0',
+    description= 'Collect timeseries information from network devices',
+    install_requires= [
+        'cffi',
+        'ncclient',
+        'jxmlease',
+        'pytest>=3.6',
+        'pytest-cov',
+        'jinja2',
+        'pyyaml>=5.1',
+        'junos-eznc',
+        'ipaddress',
+        'textfsm',
+        'jmespath',
+        'requests-mock',
+        'requests',
     ],
-    'keywords': 'netconf junos juniper timeserie tsdb f5 bigip'
-}
-
-setup(**params)
+    classifiers= [
+       'Topic :: Utilities',
+       'Environment :: Console',
+       'Intended Audience :: Developers',
+       'Intended Audience :: Information Technology',
+       'Intended Audience :: System Administrators',
+       'License :: OSI Approved :: Apache Software License',
+       'Operating System :: OS Independent',
+       'Programming Language :: Python',
+    ],
+    keywords= 'netconf junos juniper timeserie tsdb f5 bigip'
+)

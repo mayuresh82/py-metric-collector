@@ -5,9 +5,9 @@ WORKDIR /source
 USER root
 
 COPY . /source
-RUN pip install -r /source/requirements.txt
 
-RUN python setup.py develop
+RUN pip3 install setuptools
+RUN python setup.py install 
 
 RUN apt-get -y update
 RUN apt-get -y install vim
