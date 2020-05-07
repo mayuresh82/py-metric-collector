@@ -29,6 +29,14 @@ class Test_Parsers(unittest.TestCase):
 
     # pprint.pprint(data)
 
+    ## Read XML content
+    xml_data = open( test_dir + "/rpc-reply/show_interfaces_extensive_02.xml").read()
+
+    ## Return a list dict
+    data = pm.parse( input="show-interfaces-extensive.parser.yaml", data=xml_data.encode() )
+
+    # pprint.pprint(data)
+
     self.assertTrue( True )
 
 
