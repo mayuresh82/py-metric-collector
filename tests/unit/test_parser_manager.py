@@ -21,20 +21,20 @@ class Test_Validate_Main_Block(unittest.TestCase):
 
   def test_invalid_yaml(self):
     test_dir = here+'/input/01_wrong_yaml/parsers'
-    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False  )
+    pm = parser_manager.ParserManager( parser_dir=test_dir )
 
     self.assertTrue( pm.get_nbr_parsers() == 0 )
 
   def test_no_parser_key(self):
     test_dir = here+'/input/02_no_parser_key/parsers'
-    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False  )
+    pm = parser_manager.ParserManager( parser_dir=test_dir )
 
     self.assertTrue( pm.get_nbr_parsers() == 0 )
 
   def test_load_valid_xml_parser(self):
     test_dir = here+'/input/03_valid_xml_parser/parsers'
 
-    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False )
+    pm = parser_manager.ParserManager( parser_dir=test_dir )
     name = pm.get_parser_name_for(input='show-bgp-summary.parser.yaml')
 
     self.assertTrue( pm.get_nbr_parsers() == 1 )
@@ -44,7 +44,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_load_valid_regex_parser(self):
     test_dir = here+'/input/04_valid_regex_parser/parsers'
 
-    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False )
+    pm = parser_manager.ParserManager( parser_dir=test_dir )
     name = pm.get_parser_name_for(input='show-system-processes-extensive.parser.yaml')
 
     self.assertTrue( pm.get_nbr_parsers() == 1 )
@@ -54,7 +54,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_find_parser(self):
     test_dir = here+'/input/05_find_parsers/parsers'
 
-    pm = parser_manager.ParserManager( parser_dirs=[test_dir], default_parser_dir=False )
+    pm = parser_manager.ParserManager( parser_dir=test_dir )
 
     by_name = pm.get_parser_name_for(input='type-regex-regex-command.parser.yaml')
     # by_name_2 = pm.get_parser_name_for(input='type-regex-regex-command.parser')
@@ -83,7 +83,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_parse_valid_xml(self):
     test_dir = here+'/input/20_xml_parser'
 
-    pm = parser_manager.ParserManager( parser_dirs=[test_dir + "/parsers"], default_parser_dir=False )
+    pm = parser_manager.ParserManager( parser_dir=test_dir + "/parsers" )
 
     ## Read XML content
     xml_data = open( test_dir + "/rpc-reply/show_route_summary/command.xml").read()
@@ -118,7 +118,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_parse_valid_xml_enum(self):
     test_dir = here+'/input/21_xml_enum_parser'
 
-    pm = parser_manager.ParserManager( parser_dirs=[test_dir + "/parsers"], default_parser_dir=False )
+    pm = parser_manager.ParserManager( parser_dir=test_dir + "/parsers" )
 
     ## Read XML content
     xml_data = open( test_dir + "/rpc-reply/show_bgp_neighbor/command.xml").read()
@@ -171,7 +171,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_parse_valid_textfsm(self):
     test_dir = here+'/input/31_textfsm_parser'
 
-    pm = parser_manager.ParserManager( parser_dirs=[test_dir + "/parsers"], default_parser_dir=False )
+    pm = parser_manager.ParserManager( parser_dir=test_dir + "/parsers" )
 
     ## Read XML content
     xml_data = open( test_dir + "/rpc-reply/show_system_processes_extensive/command_short.xml").read()
@@ -206,7 +206,7 @@ class Test_Validate_Main_Block(unittest.TestCase):
   def test_parse_valid_json(self):
     test_dir = here+'/input/51_json_parser'
 
-    pm = parser_manager.ParserManager(parser_dirs=[test_dir + "/parsers"], default_parser_dir=False)
+    pm = parser_manager.ParserManager(parser_dir=test_dir + "/parsers")
 
     # Read JSON Content
     with open(test_dir + "/json-reply/f5-pools.json") as f:

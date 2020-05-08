@@ -94,7 +94,6 @@ parser:
         loop:
             interface: ./../name
             description: ./../description
-            admin-status: ./../admin-status
             sub-matches:
             -   { xpath: ./fec_ccw_count,                  variable-name: fec-corrected-errors }
             -   { xpath: ./fec_nccw_count,                 variable-name: fec-uncorrected-errors }

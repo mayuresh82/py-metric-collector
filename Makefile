@@ -16,4 +16,4 @@ sh:
 	docker run -t -i $(DOCKER_IMG):$(DOCKER_TAG) sh
 
 test:
-	python -m pytest
+	docker run --entrypoint=pytest -it $(DOCKER_IMG):$(DOCKER_TAG) tests/
