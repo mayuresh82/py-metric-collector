@@ -1,5 +1,5 @@
 DOCKER_IMG = chi1-docker-registry.simulprod.com/roblox/neteng-collector
-DOCKER_TAG = 0.1.26-2.0.1
+DOCKER_TAG = 0.1.26-2.0.2
 
 PWD = $(shell pwd)
 
@@ -16,4 +16,4 @@ sh:
 	docker run -t -i $(DOCKER_IMG):$(DOCKER_TAG) sh
 
 test:
-	python -m pytest
+	docker run --entrypoint=pytest -it $(DOCKER_IMG):$(DOCKER_TAG) tests/

@@ -84,3 +84,18 @@ parser:
             -   { xpath: ./output-error-list/output-resource-errors,    variable-name: output-resource-errors }
             -   { xpath: ./ethernet-mac-statistics/output-crc-errors,   variable-name: output-crc-errors }
 
+### ----------------------------------------------------------------
+### Interface FEC errors
+### ----------------------------------------------------------------
+    -   type: multi-value
+        method: xpath
+        measurement: interface_error_stats
+        xpath: //interface-information/physical-interface/ethernet-fec-statistics
+        loop:
+            interface: ./../name
+            description: ./../description
+            sub-matches:
+            -   { xpath: ./fec_ccw_count,                  variable-name: fec-corrected-errors }
+            -   { xpath: ./fec_nccw_count,                 variable-name: fec-uncorrected-errors }
+            -   { xpath: ./fec_ccw_error_rate,             variable-name: fec-corrected-errors-rate }
+            -   { xpath: ./fec_nccw_error_rate,            variable-name: fec-uncorrected-errors-rate }

@@ -1,0 +1,437 @@
+<rpc-reply xmlns:ns0="http://xml.juniper.net/junos/18.1R2/junos-interface" xmlns:ns1="http://xml.juniper.net/junos/18.1R2/junos">
+    <ns0:interface-information ns1:style="normal">
+        <ns0:physical-interface>
+            <ns0:name>et-0/0/61</ns0:name>
+            <ns0:admin-status ns1:format="Enabled">up</ns0:admin-status>
+            <ns0:oper-status>up</ns0:oper-status>
+            <ns0:local-index>715</ns0:local-index>
+            <ns0:snmp-index>533</ns0:snmp-index>
+            <ns0:generation>236</ns0:generation>
+            <ns0:description>et-0/0/7.bs2-chi1|R=bs|S=100G</ns0:description>
+            <ns0:link-level-type>Ethernet</ns0:link-level-type>
+            <ns0:mtu>9192</ns0:mtu>
+            <ns0:sonet-mode>LAN-PHY</ns0:sonet-mode>
+            <ns0:source-filtering>disabled</ns0:source-filtering>
+            <ns0:speed>100Gbps</ns0:speed>
+            <ns0:eth-switch-error>none</ns0:eth-switch-error>
+            <ns0:bpdu-error>none</ns0:bpdu-error>
+            <ns0:ld-pdu-error>none</ns0:ld-pdu-error>
+            <ns0:l2pt-error>none</ns0:l2pt-error>
+            <ns0:loopback>disabled</ns0:loopback>
+            <ns0:if-flow-control>disabled</ns0:if-flow-control>
+            <ns0:if-media-type>Fiber</ns0:if-media-type>
+
+            <ns0:if-device-flags>
+                <ns0:ifdf-present />
+                <ns0:ifdf-running />
+            </ns0:if-device-flags>
+            <ns0:ifd-specific-config-flags>
+            </ns0:ifd-specific-config-flags>
+            <ns0:if-config-flags>
+                <ns0:iff-snmp-traps />
+                <ns0:internal-flags>0x4000</ns0:internal-flags>
+            </ns0:if-config-flags>
+            <ns0:if-media-flags>
+                <ns0:ifmf-none />
+            </ns0:if-media-flags>
+            <ns0:physical-interface-cos-information>
+                <ns0:physical-interface-cos-hw-max-queues>10</ns0:physical-interface-cos-hw-max-queues>
+                <ns0:physical-interface-cos-use-max-queues>10</ns0:physical-interface-cos-use-max-queues>
+            </ns0:physical-interface-cos-information>
+            <ns0:up-hold-time>0</ns0:up-hold-time>
+            <ns0:down-hold-time>0</ns0:down-hold-time>
+            <ns0:current-physical-address>c0:bf:a7:b0:22:1b</ns0:current-physical-address>
+            <ns0:hardware-physical-address>c0:bf:a7:b0:22:1b</ns0:hardware-physical-address>
+            <ns0:interface-flapped ns1:seconds="2534664">2020-04-07 14:09:00 PDT (4w1d 08:04 ago)</ns0:interface-flapped>
+            <ns0:statistics-cleared>2020-04-07 14:10:18 PDT (4w1d 08:03 ago)</ns0:statistics-cleared>
+            <ns0:traffic-statistics ns1:style="verbose">
+                <ns0:input-bytes>5866221071023379</ns0:input-bytes>
+                <ns0:input-bps>14071056192</ns0:input-bps>
+                <ns0:output-bytes>3518744511147848</ns0:output-bytes>
+                <ns0:output-bps>9990639912</ns0:output-bps>
+                <ns0:input-packets>7275962483092</ns0:input-packets>
+                <ns0:input-pps>2161881</ns0:input-pps>
+                <ns0:output-packets>5234976462177</ns0:output-packets>
+                <ns0:output-pps>1644164</ns0:output-pps>
+                <ns0:ipv6-transit-statistics>
+                    <ns0:input-bytes>0</ns0:input-bytes>
+                    <ns0:output-bytes>0</ns0:output-bytes>
+                    <ns0:input-packets>0</ns0:input-packets>
+                    <ns0:output-packets>0</ns0:output-packets>
+                </ns0:ipv6-transit-statistics>
+            </ns0:traffic-statistics>
+            <ns0:input-error-list>
+                <ns0:input-errors>0</ns0:input-errors>
+                <ns0:input-drops>0</ns0:input-drops>
+                <ns0:framing-errors>0</ns0:framing-errors>
+                <ns0:input-runts>0</ns0:input-runts>
+                <ns0:input-discards>0</ns0:input-discards>
+                <ns0:input-l3-incompletes>0</ns0:input-l3-incompletes>
+                <ns0:input-l2-channel-errors>0</ns0:input-l2-channel-errors>
+                <ns0:input-l2-mismatch-timeouts>0</ns0:input-l2-mismatch-timeouts>
+                <ns0:input-fifo-errors>0</ns0:input-fifo-errors>
+                <ns0:input-resource-errors>0</ns0:input-resource-errors>
+            </ns0:input-error-list>
+            <ns0:output-error-list>
+                <ns0:carrier-transitions>0</ns0:carrier-transitions>
+                <ns0:output-errors>0</ns0:output-errors>
+                <ns0:output-collisions>0</ns0:output-collisions>
+                <ns0:output-drops>0</ns0:output-drops>
+                <ns0:aged-packets>0</ns0:aged-packets>
+                <ns0:mtu-errors>0</ns0:mtu-errors>
+                <ns0:hs-link-crc-errors>0</ns0:hs-link-crc-errors>
+                <ns0:output-fifo-errors>0</ns0:output-fifo-errors>
+                <ns0:output-resource-errors>0</ns0:output-resource-errors>
+            </ns0:output-error-list>
+            <ns0:queue-counters ns1:style="brief">
+                <ns0:interface-cos-short-summary>
+                    <ns0:intf-cos-queue-type>Egress queues</ns0:intf-cos-queue-type>
+                    <ns0:intf-cos-num-queues-supported>10</ns0:intf-cos-num-queues-supported>
+                    <ns0:intf-cos-num-queues-in-use>5</ns0:intf-cos-num-queues-in-use>
+                </ns0:interface-cos-short-summary>
+                <ns0:queue>
+                    <ns0:queue-number>0</ns0:queue-number>
+                    <ns0:forwarding-class-name>best-effort</ns0:forwarding-class-name>
+                    <ns0:queue-counters-queued-packets>0</ns0:queue-counters-queued-packets>
+                    <ns0:queue-counters-trans-packets>5234977505233</ns0:queue-counters-trans-packets>
+                    <ns0:queue-counters-total-drop-packets>0</ns0:queue-counters-total-drop-packets>
+                </ns0:queue>
+                <ns0:queue>
+                    <ns0:queue-number>3</ns0:queue-number>
+                    <ns0:forwarding-class-name>fcoe</ns0:forwarding-class-name>
+                    <ns0:queue-counters-queued-packets>0</ns0:queue-counters-queued-packets>
+                    <ns0:queue-counters-trans-packets>0</ns0:queue-counters-trans-packets>
+                    <ns0:queue-counters-total-drop-packets>0</ns0:queue-counters-total-drop-packets>
+                </ns0:queue>
+                <ns0:queue>
+                    <ns0:queue-number>4</ns0:queue-number>
+                    <ns0:forwarding-class-name>no-loss</ns0:forwarding-class-name>
+                    <ns0:queue-counters-queued-packets>0</ns0:queue-counters-queued-packets>
+                    <ns0:queue-counters-trans-packets>0</ns0:queue-counters-trans-packets>
+                    <ns0:queue-counters-total-drop-packets>0</ns0:queue-counters-total-drop-packets>
+                </ns0:queue>
+                <ns0:queue>
+                    <ns0:queue-number>7</ns0:queue-number>
+                    <ns0:forwarding-class-name>network-control</ns0:forwarding-class-name>
+                    <ns0:queue-counters-queued-packets>0</ns0:queue-counters-queued-packets>
+                    <ns0:queue-counters-trans-packets>1890596</ns0:queue-counters-trans-packets>
+                    <ns0:queue-counters-total-drop-packets>0</ns0:queue-counters-total-drop-packets>
+                </ns0:queue>
+                <ns0:queue>
+                    <ns0:queue-number>8</ns0:queue-number>
+                    <ns0:forwarding-class-name>mcast</ns0:forwarding-class-name>
+                    <ns0:queue-counters-queued-packets>0</ns0:queue-counters-queued-packets>
+                    <ns0:queue-counters-trans-packets>0</ns0:queue-counters-trans-packets>
+                    <ns0:queue-counters-total-drop-packets>0</ns0:queue-counters-total-drop-packets>
+                </ns0:queue>
+            </ns0:queue-counters>
+            <ns0:queue-num-forwarding-class-name-map>
+                <ns0:queue-number>0</ns0:queue-number>
+                <ns0:forwarding-class-name>best-effort</ns0:forwarding-class-name>
+            </ns0:queue-num-forwarding-class-name-map>
+            <ns0:queue-num-forwarding-class-name-map>
+                <ns0:queue-number>3</ns0:queue-number>
+                <ns0:forwarding-class-name>fcoe</ns0:forwarding-class-name>
+            </ns0:queue-num-forwarding-class-name-map>
+            <ns0:queue-num-forwarding-class-name-map>
+                <ns0:queue-number>4</ns0:queue-number>
+                <ns0:forwarding-class-name>no-loss</ns0:forwarding-class-name>
+            </ns0:queue-num-forwarding-class-name-map>
+            <ns0:queue-num-forwarding-class-name-map>
+                <ns0:queue-number>7</ns0:queue-number>
+                <ns0:forwarding-class-name>network-control</ns0:forwarding-class-name>
+            </ns0:queue-num-forwarding-class-name-map>
+            <ns0:queue-num-forwarding-class-name-map>
+                <ns0:queue-number>8</ns0:queue-number>
+                <ns0:forwarding-class-name>mcast</ns0:forwarding-class-name>
+            </ns0:queue-num-forwarding-class-name-map>
+            <ns0:active-alarms>
+                <ns0:interface-alarms>
+                    <ns0:alarm-not-present />
+                </ns0:interface-alarms>
+            </ns0:active-alarms>
+            <ns0:active-defects>
+                <ns0:interface-alarms>
+                    <ns0:alarm-not-present />
+                </ns0:interface-alarms>
+            </ns0:active-defects>
+            <ns0:ethernet-pcs-statistics ns1:style="verbose">
+                <ns0:bit-error-seconds>0</ns0:bit-error-seconds>
+                <ns0:errored-blocks-seconds>0</ns0:errored-blocks-seconds>
+            </ns0:ethernet-pcs-statistics>
+            <ns0:ethernet-fec-mode ns1:style="verbose">
+                <ns0:enabled_fec_mode>FEC91</ns0:enabled_fec_mode>
+            </ns0:ethernet-fec-mode>
+            <ns0:ethernet-fec-statistics ns1:style="verbose">
+                <ns0:fec_ccw_count>0</ns0:fec_ccw_count>
+                <ns0:fec_nccw_count>0</ns0:fec_nccw_count>
+                <ns0:fec_ccw_error_rate>0</ns0:fec_ccw_error_rate>
+                <ns0:fec_nccw_error_rate>0</ns0:fec_nccw_error_rate>
+            </ns0:ethernet-fec-statistics>
+            <ns0:ethernet-mac-statistics ns1:style="verbose">
+                <ns0:input-bytes>5866221071023379</ns0:input-bytes>
+                <ns0:output-bytes>3518744511147848</ns0:output-bytes>
+                <ns0:input-packets>7275962483092</ns0:input-packets>
+                <ns0:output-packets>5234976462177</ns0:output-packets>
+                <ns0:input-unicasts>7275962387111</ns0:input-unicasts>
+                <ns0:output-unicasts>5234976366243</ns0:output-unicasts>
+                <ns0:input-broadcasts>4626</ns0:input-broadcasts>
+                <ns0:output-broadcasts>4594</ns0:output-broadcasts>
+                <ns0:input-multicasts>91355</ns0:input-multicasts>
+                <ns0:output-multicasts>91340</ns0:output-multicasts>
+                <ns0:input-crc-errors>0</ns0:input-crc-errors>
+                <ns0:output-crc-errors>0</ns0:output-crc-errors>
+                <ns0:input-fifo-errors>0</ns0:input-fifo-errors>
+                <ns0:output-fifo-errors>0</ns0:output-fifo-errors>
+                <ns0:input-mac-control-frames>0</ns0:input-mac-control-frames>
+                <ns0:output-mac-control-frames>0</ns0:output-mac-control-frames>
+                <ns0:input-mac-pause-frames>0</ns0:input-mac-pause-frames>
+                <ns0:output-mac-pause-frames>0</ns0:output-mac-pause-frames>
+                <ns0:input-oversized-frames>0</ns0:input-oversized-frames>
+                <ns0:input-jabber-frames>0</ns0:input-jabber-frames>
+                <ns0:input-fragment-frames>0</ns0:input-fragment-frames>
+                <ns0:input-vlan-tagged-frames>0</ns0:input-vlan-tagged-frames>
+                <ns0:input-code-violations>0</ns0:input-code-violations>
+            </ns0:ethernet-mac-statistics>
+            <ns0:ethernet-mac-pfc-statistics ns1:style="verbose">
+                <ns0:mac-pfc-dot1p>0</ns0:mac-pfc-dot1p>
+                <ns0:input-mac-pfc-frames>0</ns0:input-mac-pfc-frames>
+                <ns0:output-mac-pfc-frames>0</ns0:output-mac-pfc-frames>
+            </ns0:ethernet-mac-pfc-statistics>
+            <ns0:ethernet-mac-pfc-statistics ns1:style="verbose">
+                <ns0:mac-pfc-dot1p>1</ns0:mac-pfc-dot1p>
+                <ns0:input-mac-pfc-frames>0</ns0:input-mac-pfc-frames>
+                <ns0:output-mac-pfc-frames>0</ns0:output-mac-pfc-frames>
+            </ns0:ethernet-mac-pfc-statistics>
+            <ns0:ethernet-mac-pfc-statistics ns1:style="verbose">
+                <ns0:mac-pfc-dot1p>2</ns0:mac-pfc-dot1p>
+                <ns0:input-mac-pfc-frames>0</ns0:input-mac-pfc-frames>
+                <ns0:output-mac-pfc-frames>0</ns0:output-mac-pfc-frames>
+            </ns0:ethernet-mac-pfc-statistics>
+            <ns0:ethernet-mac-pfc-statistics ns1:style="verbose">
+                <ns0:mac-pfc-dot1p>3</ns0:mac-pfc-dot1p>
+                <ns0:input-mac-pfc-frames>0</ns0:input-mac-pfc-frames>
+                <ns0:output-mac-pfc-frames>0</ns0:output-mac-pfc-frames>
+            </ns0:ethernet-mac-pfc-statistics>
+            <ns0:ethernet-mac-pfc-statistics ns1:style="verbose">
+                <ns0:mac-pfc-dot1p>4</ns0:mac-pfc-dot1p>
+                <ns0:input-mac-pfc-frames>0</ns0:input-mac-pfc-frames>
+                <ns0:output-mac-pfc-frames>0</ns0:output-mac-pfc-frames>
+            </ns0:ethernet-mac-pfc-statistics>
+            <ns0:ethernet-mac-pfc-statistics ns1:style="verbose">
+                <ns0:mac-pfc-dot1p>5</ns0:mac-pfc-dot1p>
+                <ns0:input-mac-pfc-frames>0</ns0:input-mac-pfc-frames>
+                <ns0:output-mac-pfc-frames>0</ns0:output-mac-pfc-frames>
+            </ns0:ethernet-mac-pfc-statistics>
+            <ns0:ethernet-mac-pfc-statistics ns1:style="verbose">
+                <ns0:mac-pfc-dot1p>6</ns0:mac-pfc-dot1p>
+                <ns0:input-mac-pfc-frames>0</ns0:input-mac-pfc-frames>
+                <ns0:output-mac-pfc-frames>0</ns0:output-mac-pfc-frames>
+            </ns0:ethernet-mac-pfc-statistics>
+            <ns0:ethernet-mac-pfc-statistics ns1:style="verbose">
+                <ns0:mac-pfc-dot1p>7</ns0:mac-pfc-dot1p>
+                <ns0:input-mac-pfc-frames>0</ns0:input-mac-pfc-frames>
+                <ns0:output-mac-pfc-frames>0</ns0:output-mac-pfc-frames>
+            </ns0:ethernet-mac-pfc-statistics>
+            <ns0:ethernet-prbs-mode ns1:style="verbose">
+                <ns0:prbs_mode>Disabled</ns0:prbs_mode>
+            </ns0:ethernet-prbs-mode>
+            <ns0:pfe-information>
+                <ns0:destination-slot>0</ns0:destination-slot>
+                <ns0:destination-mask>0x00</ns0:destination-mask>
+            </ns0:pfe-information>
+            <ns0:cos-header />
+            <ns0:cos-information>
+                <ns0:cos-stream-information>
+                    <ns0:cos-direction>Output</ns0:cos-direction>
+                    <ns0:cos-queue-configuration>
+                        <ns0:cos-queue-number>0</ns0:cos-queue-number>
+                        <ns0:cos-queue-forwarding-class>best-effort</ns0:cos-queue-forwarding-class>
+                        <ns0:cos-queue-bandwidth>5</ns0:cos-queue-bandwidth>
+                        <ns0:cos-queue-bandwidth-bps>5000000000</ns0:cos-queue-bandwidth-bps>
+                        <ns0:cos-queue-buffer>5</ns0:cos-queue-buffer>
+                        <ns0:cos-queue-buffer-bytes>0</ns0:cos-queue-buffer-bytes>
+                        <ns0:cos-queue-priority>low</ns0:cos-queue-priority>
+                        <ns0:cos-queue-limit>none</ns0:cos-queue-limit>
+                    </ns0:cos-queue-configuration>
+                    <ns0:cos-queue-configuration>
+                        <ns0:cos-queue-number>3</ns0:cos-queue-number>
+                        <ns0:cos-queue-forwarding-class>fcoe</ns0:cos-queue-forwarding-class>
+                        <ns0:cos-queue-bandwidth>35</ns0:cos-queue-bandwidth>
+                        <ns0:cos-queue-bandwidth-bps>35000000000</ns0:cos-queue-bandwidth-bps>
+                        <ns0:cos-queue-buffer>35</ns0:cos-queue-buffer>
+                        <ns0:cos-queue-buffer-bytes>0</ns0:cos-queue-buffer-bytes>
+                        <ns0:cos-queue-priority>low</ns0:cos-queue-priority>
+                        <ns0:cos-queue-limit>none</ns0:cos-queue-limit>
+                    </ns0:cos-queue-configuration>
+                    <ns0:cos-queue-configuration>
+                        <ns0:cos-queue-number>4</ns0:cos-queue-number>
+                        <ns0:cos-queue-forwarding-class>no-loss</ns0:cos-queue-forwarding-class>
+                        <ns0:cos-queue-bandwidth>35</ns0:cos-queue-bandwidth>
+                        <ns0:cos-queue-bandwidth-bps>35000000000</ns0:cos-queue-bandwidth-bps>
+                        <ns0:cos-queue-buffer>35</ns0:cos-queue-buffer>
+                        <ns0:cos-queue-buffer-bytes>0</ns0:cos-queue-buffer-bytes>
+                        <ns0:cos-queue-priority>low</ns0:cos-queue-priority>
+                        <ns0:cos-queue-limit>none</ns0:cos-queue-limit>
+                    </ns0:cos-queue-configuration>
+                    <ns0:cos-queue-configuration>
+                        <ns0:cos-queue-number>7</ns0:cos-queue-number>
+                        <ns0:cos-queue-forwarding-class>network-control</ns0:cos-queue-forwarding-class>
+                        <ns0:cos-queue-bandwidth>5</ns0:cos-queue-bandwidth>
+                        <ns0:cos-queue-bandwidth-bps>5000000000</ns0:cos-queue-bandwidth-bps>
+                        <ns0:cos-queue-buffer>5</ns0:cos-queue-buffer>
+                        <ns0:cos-queue-buffer-bytes>0</ns0:cos-queue-buffer-bytes>
+                        <ns0:cos-queue-priority>low</ns0:cos-queue-priority>
+                        <ns0:cos-queue-limit>none</ns0:cos-queue-limit>
+                    </ns0:cos-queue-configuration>
+                    <ns0:cos-queue-configuration>
+                        <ns0:cos-queue-number>8</ns0:cos-queue-number>
+                        <ns0:cos-queue-forwarding-class>mcast</ns0:cos-queue-forwarding-class>
+                        <ns0:cos-queue-bandwidth>20</ns0:cos-queue-bandwidth>
+                        <ns0:cos-queue-bandwidth-bps>20000000000</ns0:cos-queue-bandwidth-bps>
+                        <ns0:cos-queue-buffer>20</ns0:cos-queue-buffer>
+                        <ns0:cos-queue-buffer-bytes>0</ns0:cos-queue-buffer-bytes>
+                        <ns0:cos-queue-priority>low</ns0:cos-queue-priority>
+                        <ns0:cos-queue-limit>none</ns0:cos-queue-limit>
+                    </ns0:cos-queue-configuration>
+                </ns0:cos-stream-information>
+            </ns0:cos-information>
+            <ns0:interface-transmit-statistics>Disabled</ns0:interface-transmit-statistics>
+            <ns0:macsec-statistics>
+                <ns0:macsec-tx-sc-protected>0</ns0:macsec-tx-sc-protected>
+                <ns0:macsec-tx-sc-encrypted>0</ns0:macsec-tx-sc-encrypted>
+                <ns0:macsec-tx-sc-protectedbytes>0</ns0:macsec-tx-sc-protectedbytes>
+                <ns0:macsec-tx-sc-encryptedbytes>0</ns0:macsec-tx-sc-encryptedbytes>
+                <ns0:macsec-rx-sc-ok>0</ns0:macsec-rx-sc-ok>
+                <ns0:macsec-rx-sc-validatedbytes>0</ns0:macsec-rx-sc-validatedbytes>
+                <ns0:macsec-rx-sc-decryptedbytes>0</ns0:macsec-rx-sc-decryptedbytes>
+            </ns0:macsec-statistics>
+            <ns0:logical-interface>
+                <ns0:name>et-0/0/61.0</ns0:name>
+                <ns0:local-index>546</ns0:local-index>
+                <ns0:snmp-index>534</ns0:snmp-index>
+                <ns0:hardware-token>4093</ns0:hardware-token>
+                <ns0:generation>239</ns0:generation>
+                <ns0:if-config-flags>
+                    <ns0:iff-up />
+                    <ns0:iff-snmp-traps />
+                    <ns0:internal-flags>0x4004000</ns0:internal-flags>
+                </ns0:if-config-flags>
+                <ns0:encapsulation>ENET2</ns0:encapsulation>
+                <ns0:policer-overhead>
+                </ns0:policer-overhead>
+                <ns0:traffic-statistics ns1:indent="2" ns1:style="verbose">
+                    <ns0:input-bytes>5866220947637141</ns0:input-bytes>
+                    <ns0:output-bytes>3518748832279564</ns0:output-bytes>
+                    <ns0:input-packets>7275966485981</ns0:input-packets>
+                    <ns0:output-packets>5234990800981</ns0:output-packets>
+                    <ns0:ipv6-transit-statistics>
+                        <ns0:input-bytes>0</ns0:input-bytes>
+                        <ns0:output-bytes>0</ns0:output-bytes>
+                        <ns0:input-packets>0</ns0:input-packets>
+                        <ns0:output-packets>0</ns0:output-packets>
+                    </ns0:ipv6-transit-statistics>
+                </ns0:traffic-statistics>
+                <ns0:local-traffic-statistics>
+                    <ns0:input-bytes>2020225548</ns0:input-bytes>
+                    <ns0:output-bytes>1005440117</ns0:output-bytes>
+                    <ns0:input-packets>11426964</ns0:input-packets>
+                    <ns0:output-packets>11610152</ns0:output-packets>
+                </ns0:local-traffic-statistics>
+                <ns0:transit-traffic-statistics>
+                    <ns0:input-bytes>5866218927411593</ns0:input-bytes>
+                    <ns0:input-bps>14087733888</ns0:input-bps>
+                    <ns0:output-bytes>3518747826839447</ns0:output-bytes>
+                    <ns0:output-bps>10289707664</ns0:output-bps>
+                    <ns0:input-packets>7275955059017</ns0:input-packets>
+                    <ns0:input-pps>2163594</ns0:input-pps>
+                    <ns0:output-packets>5234979190829</ns0:output-packets>
+                    <ns0:output-pps>1669453</ns0:output-pps>
+                    <ns0:ipv6-transit-statistics>
+                        <ns0:input-bytes>0</ns0:input-bytes>
+                        <ns0:output-bytes>0</ns0:output-bytes>
+                        <ns0:input-packets>0</ns0:input-packets>
+                        <ns0:output-packets>0</ns0:output-packets>
+                    </ns0:ipv6-transit-statistics>
+                </ns0:transit-traffic-statistics>
+                <ns0:filter-information>
+                </ns0:filter-information>
+                <ns0:address-family>
+                    <ns0:address-family-name>inet</ns0:address-family-name>
+                    <ns0:mtu>9178</ns0:mtu>
+                    <ns0:max-local-cache>75000</ns0:max-local-cache>
+                    <ns0:new-hold-limit>75000</ns0:new-hold-limit>
+                    <ns0:intf-curr-cnt>1</ns0:intf-curr-cnt>
+                    <ns0:intf-unresolved-cnt>0</ns0:intf-unresolved-cnt>
+                    <ns0:intf-dropcnt>0</ns0:intf-dropcnt>
+                    <ns0:generation>319</ns0:generation>
+                    <ns0:route-table>0</ns0:route-table>
+                    <ns0:address-family-flags>
+                        <ns0:ifff-sendbcast-pkt-to-re />
+                    </ns0:address-family-flags>
+                    <ns0:filter-information>
+                    </ns0:filter-information>
+                    <ns0:policer-information>
+                    </ns0:policer-information>
+                    <ns0:interface-address>
+                        <ns0:ifa-flags>
+                            <ns0:ifaf-current-preferred />
+                            <ns0:ifaf-current-primary />
+                        </ns0:ifa-flags>
+                        <ns0:ifa-destination>10.128.194.34/31</ns0:ifa-destination>
+                        <ns0:ifa-local>10.128.194.34</ns0:ifa-local>
+                        <ns0:ifa-broadcast>Unspecified</ns0:ifa-broadcast>
+                        <ns0:generation>578</ns0:generation>
+                    </ns0:interface-address>
+                </ns0:address-family>
+                <ns0:address-family>
+                    <ns0:address-family-name>inet6</ns0:address-family-name>
+                    <ns0:mtu>9178</ns0:mtu>
+                    <ns0:max-local-cache>75000</ns0:max-local-cache>
+                    <ns0:new-hold-limit>75000</ns0:new-hold-limit>
+                    <ns0:intf-curr-cnt>1</ns0:intf-curr-cnt>
+                    <ns0:intf-unresolved-cnt>0</ns0:intf-unresolved-cnt>
+                    <ns0:intf-dropcnt>0</ns0:intf-dropcnt>
+                    <ns0:generation>320</ns0:generation>
+                    <ns0:route-table>0</ns0:route-table>
+                    <ns0:address-family-flags>
+                        <ns0:ifff-none />
+                    </ns0:address-family-flags>
+                    <ns0:interface-address>
+                        <ns0:ifa-flags>
+                            <ns0:ifaf-current-preferred />
+                            <ns0:ifaf-current-primary />
+                        </ns0:ifa-flags>
+                        <ns0:ifa-destination>2620:135:60fe::610/127</ns0:ifa-destination>
+                        <ns0:ifa-local>2620:135:60fe::610</ns0:ifa-local>
+                        <ns0:interface-address>
+                            <ns0:in6-addr-flags>
+                                <ns0:ifaf-none />
+                            </ns0:in6-addr-flags>
+                        </ns0:interface-address>
+                        <ns0:ifa-broadcast>Unspecified</ns0:ifa-broadcast>
+                        <ns0:generation>580</ns0:generation>
+                    </ns0:interface-address>
+                    <ns0:interface-address>
+                        <ns0:ifa-flags>
+                            <ns0:ifaf-current-preferred />
+                            <ns0:internal-flags>0x800</ns0:internal-flags>
+                        </ns0:ifa-flags>
+                        <ns0:ifa-destination>fe80::/64</ns0:ifa-destination>
+                        <ns0:ifa-local>fe80::c2bf:a7ff:feb0:221b</ns0:ifa-local>
+                        <ns0:interface-address>
+                            <ns0:in6-addr-flags>
+                                <ns0:ifaf-none />
+                            </ns0:in6-addr-flags>
+                        </ns0:interface-address>
+                        <ns0:ifa-broadcast>Unspecified</ns0:ifa-broadcast>
+                        <ns0:generation>582</ns0:generation>
+                    </ns0:interface-address>
+                </ns0:address-family>
+            </ns0:logical-interface>
+        </ns0:physical-interface>
+    </ns0:interface-information>
+    <cli>
+        <banner>{master:0}</banner>
+    </cli>
+</rpc-reply>
