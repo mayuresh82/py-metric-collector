@@ -8,7 +8,7 @@ from metric_collector import json_collector
 from metric_collector import utils
 
 logger = logging.getLogger('collector')
-global_measurement_prefix = 'metric_collector'
+global_measurement_prefix = 'metric_collector_external'
 
 class Collector:
 
